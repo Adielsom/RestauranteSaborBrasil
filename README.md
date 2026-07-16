@@ -70,10 +70,21 @@ O arquivo **`banco.sql`**, localizado na raiz do projeto, contém todas as instr
 6. O script gerará o banco de dados `restaurante_db`, construirá as tabelas relacionais com suas respectivas chaves estrangeiras, cadastrará as 10 mesas fixas do salão e inserirá os dados iniciais do cardápio e da equipe operacional.
 
 ### 4.4. Configuração dos Parâmetros de Conexão
-Os dados de autenticação com o banco de dados estão centralizados no arquivo **`config/db.php`**. A configuração padrão atende à instalação nativa do WampServer64 (usuário `root` sem senha):
+Os dados de autenticação com o banco de dados estão centralizados no arquivo **`config/db.php`**. A configuração padrão atende à instalação nativa do WampServer64 (usuário `root` e senha ´root´):
 
 ```php
 $host = '127.0.0.1';       // Endereço de loopback (Evita latência de resolução DNS do Windows)
 $dbname = 'restaurante_db';// Nome da base de dados gerada pelo script
 $username = 'root';        // Usuário padrão do MySQL
-$password = '';            // Insira a senha aqui caso o seu ambiente local exija autenticação
+$password = 'root';
+
+---
+
+4.5. Inicialização da Aplicação
+Após a execução do script SQL e verificação dos parâmetros de conexão, acesse o sistema através do navegador web pelo endereço:
+http://localhost/restaurante/index.php
+
+------
+5. Credenciais Padrão para AvaliaçãoPara agilizar o processo de verificação e correção pelo docente, o script de banco de dados cadastra previamente usuários de teste para ambos os perfis com hashes criptográficos funcionais:Nome do Operador / GestorLogin de AcessoPalavra-passePerfil AtribuídoMódulo de EntradaAdielson dos Santosadielsonadmin123adminPainel Gerencial ERPGestão Sistema Padrãoadminadmin123adminPainel Gerencial ERPJhonatas Gomesjhonatasgarcom123garcomSalão de Mesas PDV
+
+
