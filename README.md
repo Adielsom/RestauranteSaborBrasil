@@ -62,3 +62,36 @@ $host = '127.0.0.1';       // IP local (Evita bugs de resolução de DNS do Wind
 $dbname = 'restaurante_db';
 $username = 'root';
 $password = '';            // Se o seu servidor local exigir senha para o root, insira aqui.
+
+
+5. Acesso ao Sistema
+Abra seu navegador web e acesse o endereço de inicialização:
+👉 http://localhost/restaurante/index.php
+
+🔑 Credenciais Padrão para Teste e Avaliação
+Para facilitar a correção do professor, o banco de dados inicia pré-cadastrado com usuários reais da equipe e senhas já convertidas em hashes válidos pelo algoritmo Bcrypt:
+
+Operador / GestorLogin (Usuário)Palavra-passe (Senha)Perfil de AcessoÁrea Direcionada
+Gestão Sistema Padrão	admin	admin123	admin	Painel Gerencial ERP
+Jhonatas	jhonatas	garcom123	garcom	Salão de Mesas PDV
+Lucas	garcom	garcom123	garcom	Salão de Mesas PDV
+
+Diferenciais Implementados (Bônus do Desafio)
+O projeto cumpre todos os requisitos obrigatórios e entrega os seguintes diferenciais de engenharia:
+
+🖨️ Impressão Nativa de Comanda (@media print): A tela de fechamento de conta possui uma formatação exclusiva no CSS para impressão. Ao clicar em Imprimir Cupom, o navegador oculta toda a interface escura de menus, gerando um cupom limpo em preto e branco estruturado para impressoras térmicas ou papel A4.
+
+📊 Gráfico Interativo de Faturamento (Chart.js): O relatório analítico executa agregações (SUM e GROUP BY) no banco e exporta os arrays para a biblioteca visual Chart.js, desenhando um gráfico de rosca em tempo real com a porcentagem de receita entre Bebidas, Entradas, Pratos Principais e Sobremesas.
+
+🏆 Algoritmo "Operador Destaque": O relatório analisa os dados de vendas do período selecionado e identifica automaticamente qual garçom faturou o maior valor e atendeu o maior número de mesas, exibindo um painel de honra com os indicadores de desempenho da equipe.
+
+🚫 Controle de Estoque Sem Perda de Dados (Soft Toggle): Se um prato se esgotar na cozinha durante o serviço, o gerente desativa a disponibilidade com um clique através da função IF(disponivel = 1, 0, 1) no MySQL. O item sai imediatamente da tela do garçom, mas permanece no banco para não quebrar relatórios de dias anteriores.
+
+👨‍💻 Autores e Desenvolvimento
+Projeto planejado, modelado e programado com aplicação de boas práticas de desenvolvimento web na matéria de Programação para Internet I:
+
+Engenharia de Software e Full-Stack: Adielson dos Santos & Equipe
+
+Curso: Análise e Desenvolvimento de Sistemas
+
+ERP & PDV SABOR BRASIL 🇧🇷 · Todos os direitos reservados.
