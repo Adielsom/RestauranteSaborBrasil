@@ -77,6 +77,7 @@ $host = '127.0.0.1';       // Endereço de loopback (Evita latência de resoluç
 $dbname = 'restaurante_db';// Nome da base de dados gerada pelo script
 $username = 'root';        // Usuário padrão do MySQL
 $password = 'root';
+````
 
 
 
