@@ -78,13 +78,4 @@ $dbname = 'restaurante_db';// Nome da base de dados gerada pelo script
 $username = 'root';        // Usuário padrão do MySQL
 $password = 'root';
 
----
-
-4.5. Inicialização da Aplicação
-Após a execução do script SQL e verificação dos parâmetros de conexão, acesse o sistema através do navegador web pelo endereço:
-http://localhost/restaurante/index.php
-
-------
-5. Credenciais Padrão para AvaliaçãoPara agilizar o processo de verificação e correção pelo docente, o script de banco de dados cadastra previamente usuários de teste para ambos os perfis com hashes criptográficos funcionais:Nome do Operador / GestorLogin de AcessoPalavra-passePerfil AtribuídoMódulo de EntradaAdielson dos Santosadielsonadmin123adminPainel Gerencial ERPGestão Sistema Padrãoadminadmin123adminPainel Gerencial ERPJhonatas Gomesjhonatasgarcom123garcomSalão de Mesas PDV
-
 
