@@ -87,7 +87,7 @@ Para agilizar o processo de verificação e correção pelo docente, o script de
 
 | Nome do Operador / Gestor | Login de Acesso | Palavra-passe | Perfil Atribuído | Módulo de Entrada |
 | :--- | :--- | :--- | :--- | :--- |
-| **Adielson dos Santos** | `adielson` | `admin123` | `admin` | Painel Gerencial ERP |
+| **Adielson dos Santos** | `garcom` | `garcom123` | `garcom` | Salão de Mesas PDV |
 | **Gestão Sistema Padrão** | `admin` | `admin123` | `admin` | Painel Gerencial ERP |
 | **Jhonatas Gomes** | `jhonatas` | `garcom123` | `garcom` | Salão de Mesas PDV |
 
