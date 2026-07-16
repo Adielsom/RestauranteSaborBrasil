@@ -79,3 +79,36 @@ $username = 'root';        // Usuário padrão do MySQL
 $password = 'root';
 
 
+
+## 5. Credenciais Padrão para Avaliação
+
+Para agilizar o processo de verificação e correção pelo docente, o script de banco de dados cadastra previamente usuários de teste para ambos os perfis com hashes criptográficos funcionais:
+
+| Nome do Operador / Gestor | Login de Acesso | Palavra-passe | Perfil Atribuído | Módulo de Entrada |
+| :--- | :--- | :--- | :--- | :--- |
+| **Adielson dos Santos** | `adielson` | `admin123` | `admin` | Painel Gerencial ERP |
+| **Gestão Sistema Padrão** | `admin` | `admin123` | `admin` | Painel Gerencial ERP |
+| **Jhonatas Gomes** | `jhonatas` | `garcom123` | `garcom` | Salão de Mesas PDV |
+
+---
+
+## 7. Funcionalidades Avançadas e Diferenciais Técnicos
+
+Além da cobertura integral dos requisitos obrigatórios solicitados nas especificações do desafio, foram implementadas as seguintes soluções de engenharia:
+
+1. **Impressão Nativa de Comandas (`@media print`):** A interface de fechamento de conta (`pedidos/fechar_conta.php`) possui folha de estilo adaptada exclusivamente para impressão. Ao acionar o botão de impressão, o navegador suprime os elementos de navegação e menus, renderizando um extrato limpo e estruturado em preto e branco, compatível com impressoras térmicas de cupom ou formato A4.
+2. **Gráfico Interativo de Faturamento via Chart.js:** O relatório gerencial processa agregações no banco de dados (`SUM` com `GROUP BY`) para calcular a receita dividida por categorias (Pratos Principais, Bebidas, Entradas e Sobremesas). O array resultante é convertido em JSON e enviado ao JavaScript para renderização de um gráfico analítico de rosca (*Doughnut Chart*) sem a necessidade de processamento externo.
+3. **Algoritmo de Mapeamento de Desempenho Operacional:** A tela de auditoria processa uma consulta que avalia as vendas vinculadas aos operadores no período filtrado, identificando automaticamente o garçom com maior volume de faturamento gerado e maior quantidade de mesas atendidas, exibindo um indicador de destaque gerencial no topo do relatório.
+4. **Controle de Estoque Sem Separação de Histórico (Soft Toggle):** Para evitar a exclusão física de registros — o que invalidaria cálculos de faturamento de meses anteriores —, o gerenciamento do cardápio adota a alteração de status lógica através de instrução condicional no MySQL (`IF(disponivel = 1, 0, 1)`). O produto esgotado desaparece imediatamente da tela do garçom, preservando a integridade do banco de dados relacional.
+
+---
+
+## 8. Autoria e Desenvolvimento
+
+Software concebido, modelado e desenvolvido integralmente para a disciplina de **Programação para Internet I**:
+
+* **Desenvolvedor Full-Stack:** Adielson dos Santos
+* **Curso:** Análise e Desenvolvimento de Sistemas
+
+---
+*Instituto Federal · Curso Superior de Análise e Desenvolvimento de Sistemas · 2026*
