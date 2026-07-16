@@ -1,97 +1,118 @@
-# 🇧🇷 SABOR BRASIL · Sistema Integrado de Gestão Gastronômica & PDV
-
-O **SABOR BRASIL** é um sistema web Full-Stack de Ponto de Venda (PDV) e Planejamento de Recursos Empresariais (ERP) desenvolvido para digitalizar o fluxo operacional de restaurantes de médio porte. O software cobre desde a recepção e controle visual de mesas até o lançamento de comandas, emissão de extratos com preservação de histórico de preços e relatórios gerenciais com gráficos analíticos.
-
-Projeto desenvolvido como requisito de avaliação da disciplina de **Programação para Internet I** do curso de **Análise e Desenvolvimento de Sistemas**.
+# ERP & PDV SABOR BRASIL
+**Sistema Integrado de Gestão Gastronômica, Controle de Salão e Ponto de Venda**
 
 ---
 
-## 🎯 Objetivo e Contexto
+## 1. Visão Geral e Objetivos do Sistema
 
-Sistemas tradicionais baseados em papel e caneta geram erros de comunicação entre salão e cozinha, atrasos em horários de pico e furos no controle de caixa. Este projeto resolve esse problema digitalizando integralmente o atendimento web, utilizando o **PHP 8+** como camada central de lógica de negócios e o **MySQL** como banco de dados relacional.
+O **SABOR BRASIL** é uma aplicação web Full-Stack orientada à digitalização e ao controle operacional de restaurantes de médio porte. O software foi concebido para substituir processos manuais de atendimento por um fluxo automatizado e auditável, eliminando erros de comunicação entre o salão e a cozinha, atrasos em horários de pico e divergências no fechamento de caixa.
 
-### 🛡️ Destaques da Arquitetura e Segurança:
-* **Preservação Histórica de Preços:** Ao adicionar um item na comanda, o preço unitário e o nome do produto no momento exato do pedido são gravados de forma fixa na tabela `pedido_itens`. Mudanças futuras nos preços do cardápio não alteram o histórico nem adulteram relatórios financeiros antigos.
-* **Segurança contra SQL Injection:** Toda e qualquer comunicação com o banco de dados é intermediada por **PDO (PHP Data Objects)** com o uso de *Prepared Statements*. Nenhuma consulta é feita por concatenação direta de variáveis.
-* **Criptografia Padrão Bcrypt:** As senhas dos operadores nunca são salvas em texto puro. O sistema aplica obrigatoriamente a função nativa `password_hash()` no cadastro e valida o acesso via `password_verify()`.
-* **Transações Atômicas (`Commit / Rollback`):** O gerenciamento de abertura de mesas, lançamento de pedidos e liberação de caixa utiliza transações no MySQL, prevenindo dados inconsistentes em caso de falhas de rede ou servidor.
-* **Sessões e Proteção de Rotas (`$_SESSION`):** Nenhuma página interna pode ser acessada sem autenticação. O topo de cada script valida o perfil do usuário logado e redireciona automaticamente invasores ou acessos não autorizados.
+O sistema foi desenvolvido como requisito de avaliação na disciplina de **Programação para Internet I** do curso superior de **Análise e Desenvolvimento de Sistemas**, utilizando a linguagem **PHP 8+** na camada de lógica no servidor e o **MySQL** como sistema de gerenciamento de banco de dados relacional.
 
 ---
 
-## 👥 Perfis de Acesso
+## 2. Padrões de Arquitetura e Segurança de Dados
 
-O sistema gerencia dois níveis de privilégios controlados rigidamente via sessão:
+O projeto foi estruturado seguindo rigorosas boas práticas de engenharia de software e segurança da informação:
 
-| Perfil | Nível de Acesso | Funcionalidades Autorizadas |
+### 2.1. Preservação Histórica de Preços e Auditoria
+Para manter a integridade fiscal e financeira do estabelecimento, o modelo relacional adota a dissociação entre o catálogo atual e o histórico de vendas. No momento em que o operador lança um produto na comanda, o sistema realiza uma consulta ao catálogo e grava o `nome_item` e o `preco_unitario` de forma estática na tabela `pedido_itens`. 
+Desta forma, reajustes futuros nos preços do cardápio não alteram o valor das contas já encerradas, garantindo que os relatórios contábeis reflitam exatamente o valor transacionado na data da venda.
+
+### 2.2. Prevenção contra SQL Injection (PHP PDO)
+Todas as operações de entrada, saída e manipulação de dados utilizam exclusivamente a extensão **PDO (PHP Data Objects)** com declarações preparadas (*Prepared Statements*). A vinculação de parâmetros via `bindParam()` e `execute()` impede a concatenação direta de variáveis em strings SQL, neutralizando riscos de ataques por injeção de código.
+
+### 2.3. Criptografia e Autenticação de Senhas
+O armazenamento de credenciais descarta o uso de texto puro ou algoritmos obsoletos (como MD5 ou SHA1). O sistema aplica a função nativa `password_hash()` utilizando o algoritmo **Bcrypt** para a geração de hashes criptográficos unidirecionais no cadastro de usuários, autenticando as sessões por meio do processamento analítico de `password_verify()`.
+
+### 2.4. Integridade Transacional (Commit e Rollback)
+Operações críticas que envolvem múltiplas tabelas simultaneamente — como a abertura de comandas (que insere o pedido e altera o status da mesa) ou o recebimento de contas (que altera o status do pedido, registra a forma de pagamento e libera a mesa) — são encapsuladas em blocos transacionados (`$pdo->beginTransaction()`, `$pdo->commit()` e `$pdo->rollBack()`). Caso ocorra qualquer falha de processamento em uma das etapas, todas as alterações são desfeitas no banco de dados, impedindo inconsistências.
+
+### 2.5. Controle de Acesso via Sessão (`$_SESSION`)
+O controle de roteamento e privilégios é validado no servidor antes da renderização de qualquer interface HTML. O middleware utilitário `session_helper.php` verifica a existência da sessão ativa e o perfil do usuário logado, redirecionando automaticamente acessos não autorizados para a tela de autenticação.
+
+---
+
+## 3. Perfis de Usuário e Controle de Permissões
+
+O sistema implementa o controle de acesso baseado em funções (RBAC - *Role-Based Access Control*), dividindo a operação em dois níveis hierárquicos distintos:
+
+| Perfil de Acesso | Módulo Direcionado | Permissões e Funcionalidades Autorizadas |
 | :--- | :--- | :--- |
-| **Administrador (`admin`)** | **Gestão Total (ERP)** | Acesso aos painéis gerenciais, CRUD completo do catálogo de produtos, controle de estoque (ativar/desativar itens no salão), cadastro e auditoria de operadores, e visualização de relatórios de faturamento com filtros de data e gráficos analíticos. |
-| **Garçom (`garcom`)** | **Operação de Salão (PDV)** | Visualização gráfica do salão com status em tempo real (Livre, Ocupada, Aguardando Pagamento), abertura de comandas, lançamento e estorno de itens, emissão de cupom de conferência e processamento de fechamento de contas. |
+| **Administrador (`admin`)** | **ERP Gerencial** | Acesso integral ao sistema. Gestão do catálogo de produtos (cadastro, edição, precificação e alteração de disponibilidade), gerenciamento de equipe (cadastro de novos operadores e bloqueio de acessos) e consulta a relatórios analíticos de vendas com filtragem por período e renderização de gráficos. |
+| **Garçom (`garcom`)** | **PDV Operacional** | Acesso restrito ao salão. Monitoramento em tempo real do mapa de mesas (Livre, Ocupada, Aguardando Pagamento), abertura de comandas, lançamento e estorno de itens no pedido, conferência de subtotais e processamento do fechamento de conta. |
 
-> 🔒 **Trava de Segurança Backend:** Um administrador logado é bloqueado pelo sistema de desativar a própria credencial de acesso em uso, impedindo o bloqueio acidental da gerência.
+> **Observação Técnica:** A camada de backend conta com uma trava de segurança que impede que um administrador autenticado desative ou bloqueie a própria conta em uso, evitando a indisponibilidade acidental do painel de gestão.
 
 ---
 
-## 🛠️ Como Executar o Projeto Localmente (Guia do Avaliador)
+## 4. Guia de Instalação e Execução (Ambiente Local)
 
-O projeto foi configurado e testado para execução nativa em servidores locais como **WampServer64** ou **XAMPP**. Siga os passos abaixo para rodar em seu computador:
+As instruções abaixo descrevem o procedimento necessário para configurar, executar e avaliar o projeto em um ambiente local utilizando servidores como **WampServer64** ou **XAMPP**.
 
-### 1. Pré-requisitos
-* Servidor local instalado ([WampServer64](https://www.wampserver.com/) ou [XAMPP](https://www.apachefriends.org/)) rodando **PHP 8.0+** e **MySQL 5.7+ / MariaDB**.
-* Serviço Apache rodando na porta padrão web (`80`) e MySQL na porta padrão (`3306`).
+### 4.1. Pré-requisitos
+* Servidor web local ([WampServer64](https://www.wampserver.com/) ou [XAMPP](https://www.apachefriends.org/)) com **PHP 8.0+** e **MySQL 5.7+** (ou MariaDB) ativos.
+* Portas padrão liberadas no sistema operacional: HTTP (`80`) e MySQL (`3306`).
 
-### 2. Alocação dos Arquivos
-1. Clone ou copie a pasta integral do projeto (`restaurante`) para dentro do diretório raiz web do seu servidor:
-   * No **WampServer:** Coloque em `C:\wamp64\www\restaurante`
-   * No **XAMPP:** Coloque em `C:\xampp\htdocs\restaurante`
-2. Certifique-se de manter a estrutura original de pastas intacta.
+### 4.2. Instalação dos Arquivos
+1. Clone este repositório ou copie a pasta integral do projeto (`restaurante`) para o diretório de publicação web do servidor:
+   * **WampServer:** `C:\wamp64\www\restaurante`
+   * **XAMPP:** `C:\xampp\htdocs\restaurante`
+2. Certifique-se de que a estrutura de diretórios original seja mantida.
 
-### 3. Importação do Banco de Dados (`banco.sql`)
-O arquivo **`banco.sql`** na raiz do projeto é o script DDL/DML que prepara todo o ecossistema do restaurante.
-1. Ligue os serviços do seu servidor local (o ícone do WampServer deve ficar **Verde 🟢**).
-2. Abra seu navegador web e acesse o painel do MySQL: `http://localhost/phpmyadmin/`.
-3. Clique na aba principal **SQL** na parte superior.
-4. Abra o arquivo **`banco.sql`** em um editor de texto, copie **todo** o seu conteúdo e cole na caixa de comandos do phpMyAdmin.
-5. Clique no botão **Executar**. 
-6. *Pronto!* O script criará o banco `restaurante_db`, implementará todas as tabelas e chaves estrangeiras, irá pré-cadastrar as 10 mesas fixas do salão e populará o cardápio e a equipe com senhas criptografadas.
+### 4.3. Implementação do Banco de Dados (`banco.sql`)
+O arquivo **`banco.sql`**, localizado na raiz do projeto, contém todas as instruções DDL (criação de estrutura) e DML (carga de dados) necessárias para o funcionamento do sistema.
+1. Inicie os serviços do servidor web e do banco de dados no seu painel de controle local.
+2. Acesse o gerenciador de banco de dados pelo navegador: `http://localhost/phpmyadmin/`.
+3. Clique na aba superior **SQL**.
+4. Abra o arquivo **`banco.sql`** em um editor de texto, copie integralmente todo o código e cole na área de execução do phpMyAdmin.
+5. Clique no botão **Executar**.
+6. O script gerará o banco de dados `restaurante_db`, construirá as tabelas relacionais com suas respectivas chaves estrangeiras, cadastrará as 10 mesas fixas do salão e inserirá os dados iniciais do cardápio e da equipe operacional.
 
-### 4. Parâmetros de Conexão
-As configurações de conexão ficam isoladas em um único arquivo: **`config/db.php`**. Por padrão, o ambiente vem configurado para o WampServer64 (usuário `root` sem senha):
+### 4.4. Configuração dos Parâmetros de Conexão
+Os dados de autenticação com o banco de dados estão centralizados no arquivo **`config/db.php`**. A configuração padrão atende à instalação nativa do WampServer64 (usuário `root` sem senha):
+
 ```php
-$host = '127.0.0.1';       // IP local (Evita bugs de resolução de DNS do Windows)
-$dbname = 'restaurante_db';
-$username = 'root';
-$password = '';            // Se o seu servidor local exigir senha para o root, insira aqui.
-
-
-5. Acesso ao Sistema
-Abra seu navegador web e acesse o endereço de inicialização:
-👉 http://localhost/restaurante/index.php
-
-🔑 Credenciais Padrão para Teste e Avaliação
-Para facilitar a correção do professor, o banco de dados inicia pré-cadastrado com usuários reais da equipe e senhas já convertidas em hashes válidos pelo algoritmo Bcrypt:
-
-Operador / GestorLogin (Usuário)Palavra-passe (Senha)Perfil de AcessoÁrea Direcionada
-Gestão Sistema Padrão	admin	admin123	admin	Painel Gerencial ERP
-Jhonatas	jhonatas	garcom123	garcom	Salão de Mesas PDV
-Lucas	garcom	garcom123	garcom	Salão de Mesas PDV
-
-Diferenciais Implementados (Bônus do Desafio)
-O projeto cumpre todos os requisitos obrigatórios e entrega os seguintes diferenciais de engenharia:
-
-🖨️ Impressão Nativa de Comanda (@media print): A tela de fechamento de conta possui uma formatação exclusiva no CSS para impressão. Ao clicar em Imprimir Cupom, o navegador oculta toda a interface escura de menus, gerando um cupom limpo em preto e branco estruturado para impressoras térmicas ou papel A4.
-
-📊 Gráfico Interativo de Faturamento (Chart.js): O relatório analítico executa agregações (SUM e GROUP BY) no banco e exporta os arrays para a biblioteca visual Chart.js, desenhando um gráfico de rosca em tempo real com a porcentagem de receita entre Bebidas, Entradas, Pratos Principais e Sobremesas.
-
-🏆 Algoritmo "Operador Destaque": O relatório analisa os dados de vendas do período selecionado e identifica automaticamente qual garçom faturou o maior valor e atendeu o maior número de mesas, exibindo um painel de honra com os indicadores de desempenho da equipe.
-
-🚫 Controle de Estoque Sem Perda de Dados (Soft Toggle): Se um prato se esgotar na cozinha durante o serviço, o gerente desativa a disponibilidade com um clique através da função IF(disponivel = 1, 0, 1) no MySQL. O item sai imediatamente da tela do garçom, mas permanece no banco para não quebrar relatórios de dias anteriores.
-
-👨‍💻 Autores e Desenvolvimento
-Projeto planejado, modelado e programado com aplicação de boas práticas de desenvolvimento web na matéria de Programação para Internet I:
-
-Engenharia de Software e Full-Stack: Adielson dos Santos & Equipe
-
-Curso: Análise e Desenvolvimento de Sistemas
-
-ERP & PDV SABOR BRASIL 🇧🇷 · Todos os direitos reservados.
+$host = '127.0.0.1';       // Endereço de loopback (Evita latência de resolução DNS do Windows)
+$dbname = 'restaurante_db';// Nome da base de dados gerada pelo script
+$username = 'root';        // Usuário padrão do MySQL
+$password = '';            // Insira a senha aqui caso o seu ambiente local exija autenticação
+4.5. Inicialização da AplicaçãoApós a execução do script SQL e verificação dos parâmetros de conexão, acesse o sistema através do navegador web pelo endereço:http://localhost/restaurante/index.php5. Credenciais Padrão para AvaliaçãoPara agilizar o processo de verificação e correção pelo docente, o script de banco de dados cadastra previamente usuários de teste para ambos os perfis com hashes criptográficos funcionais:Nome do Operador / GestorLogin de AcessoPalavra-passePerfil AtribuídoMódulo de EntradaAdielson dos Santosadielsonadmin123adminPainel Gerencial ERPGestão Sistema Padrãoadminadmin123adminPainel Gerencial ERPJhonatas Gomesjhonatasgarcom123garcomSalão de Mesas PDVKeyllane Guedeskeyllanegarcom123garcomSalão de Mesas PDVMorgana dos Reismorganagarcom123garcomSalão de Mesas PDV6. Estrutura Modular do ProjetoA arquitetura do código separa as responsabilidades entre regras de controle, persistência relacional e apresentação da interface corporativa:Plaintextrestaurante/
+├── index.php                 # Tela de autenticação com validação de hash e redirecionamento
+├── logout.php                # Encerramento seguro de sessão e destruição de cookies de acesso
+├── banco.sql                 # Script SQL relacional integral (Tabelas, mesas, cardápio e equipe)
+├── README.md                 # Manual de documentação técnica e instruções de implantação
+│
+├── config/
+│   └── db.php                # Instanciação centralizada de conexão PDO e tratamento de exceções
+│
+├── utils/
+│   └── session_helper.php    # Funções de controle de rotas: verificar_login(), verificar_perfil() e escape h()
+│
+├── admin/                    # [MÓDULO ERP - ACESSO RESTRITO A ADMINISTRADORES]
+│   ├── dashboard.php         # Painel gerencial com indicadores financeiros do dia e métricas operacionais
+│   ├── relatorio.php         # Auditoria financeira por período, Curva ABC de produtos e destaques
+│   ├── usuarios.php          # Gestão de equipe, listagem de acessos e formulário de cadastramento
+│   ├── salvar_usuario.php    # Validação e gravação no banco com aplicação obrigatória de password_hash()
+│   └── toggle_usuario.php    # Processador de bloqueio e reativação de credenciais de operadores
+│
+├── cardapio/                 # [MÓDULO DE PRODUTOS - ACESSO RESTRITO A ADMINISTRADORES]
+│   ├── listar.php            # Tabela geral de catálogo de produtos organizada por categorias
+│   ├── form.php              # Formulário unificado de cadastro (Novo) e alteração (Edição) de produtos
+│   ├── salvar.php            # Processador de persistência (Executa INSERT ou UPDATE dinamicamente)
+│   └── toggle_status.php     # Interruptor de estoque para indisponibilizar itens no salão sem excluí-los
+│
+├── mesas/                    # [MÓDULO DE SALÃO - ACESSO OPERACIONAL / GARÇOM]
+│   ├── mapa.php              # Grade visual com cards de mesas e identificação de status por cores
+│   └── abrir.php             # Processador transacional de inicialização de comandas no banco
+│
+├── pedidos/                  # [MÓDULO DE COMANDAS - ACESSO OPERACIONAL / GARÇOM]
+│   ├── ver.php               # Painel de atendimento da mesa: lançamento de itens e cálculo em tempo real
+│   ├── adicionar_item.php    # Gravação de itens na comanda com captura estática do preço vigente
+│   ├── remover_item.php      # Estorno auditável de itens e recálculo automático do saldo da comanda
+│   ├── fechar_conta.php      # Emissão de cupom de consumo, auditoria de extrato e seleção de pagamento
+│   └── confirmar_pagamento.php # Processador transacional: encerra o pedido no histórico e libera a mesa
+│
+└── css/
+    └── style.css             # Folha de estilos corporativa (Design sóbrio em Grafite Escuro e Esmeralda)
+7. Funcionalidades Avançadas e Diferenciais TécnicosAlém da cobertura integral dos requisitos obrigatórios solicitados nas especificações do desafio, foram implementadas as seguintes soluções de engenharia:Impressão Nativa de Comandas (@media print): A interface de fechamento de conta (pedidos/fechar_conta.php) possui folha de estilo adaptada exclusivamente para impressão. Ao acionar o botão de impressão, o navegador suprime os elementos de navegação e menus, renderizando um extrato limpo e estruturado em preto e branco, compatível com impressoras térmicas de cupom ou formato A4.Gráfico Interativo de Faturamento via Chart.js: O relatório gerencial processa agregações no banco de dados (SUM com GROUP BY) para calcular a receita dividida por categorias (Pratos Principais, Bebidas, Entradas e Sobremesas). O array resultante é convertido em JSON e enviado ao JavaScript para renderização de um gráfico analítico de rosca (Doughnut Chart) sem a necessidade de processamento externo.Algoritmo de Mapeamento de Desempenho Operacional: A tela de auditoria processa uma consulta que avalia as vendas vinculadas aos operadores no período filtrado, identificando automaticamente o garçom com maior volume de faturamento gerado e maior quantidade de mesas atendidas, exibindo um indicador de destaque gerencial no topo do relatório.Controle de Estoque Sem Separação de Histórico (Soft Toggle): Para evitar a exclusão física de registros — o que invalidaria cálculos de faturamento de meses anteriores —, o gerenciamento do cardápio adota a alteração de status lógica através de instrução condicional no MySQL (IF(disponivel = 1, 0, 1)). O produto esgotado desaparece imediatamente da tela do garçom, preservando a integridade do banco de dados relacional.8. Equipe de DesenvolvimentoSoftware concebido, modelado e desenvolvido pelos discentes do curso de Análise e Desenvolvimento de Sistemas para a disciplina de Programação para Internet I:Adielson dos SantosJhonatas GomesKeyllane Francisca GuedesMorgana dos ReisInstituto Federal · Curso Superior de Análise e Desenvolvimento de Sistemas · 2026
