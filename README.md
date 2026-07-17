@@ -108,6 +108,9 @@ Além da cobertura integral dos requisitos obrigatórios solicitados nas especif
 
 Software concebido, modelado e desenvolvido integralmente para a disciplina de **Programação para Internet I**:
 
+LINK DO VIDEO NO YOUTUBE
+https://youtu.be/P-9-Ariw2tE
+
 * **Desenvolvedor Full-Stack:** Adielson dos Santos
 * **Curso:** Análise e Desenvolvimento de Sistemas
 
